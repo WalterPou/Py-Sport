@@ -138,8 +138,8 @@ def predict_trajectory():
 
 def play_bump_animation(player):
     # forward bump push
-    player.arm_left.animate_position((-0.25, -0.45, 0.4), duration=0.08, curve=curve.linear)
-    player.arm_right.animate_position((0.25, -0.45, 0.4), duration=0.08, curve=curve.linear)
+    player.arm_left.animate_position((-0.25, -0.25, 0.4), duration=0.08, curve=curve.linear)
+    player.arm_right.animate_position((0.25, -0.25, 0.4), duration=0.08, curve=curve.linear)
 
     # slight dip
     invoke(
@@ -153,10 +153,31 @@ def play_bump_animation(player):
     # return to idle
     invoke(
         lambda: [
-            player.arm_left.animate_position((-0.25, -0.4, 0.7), duration=0.12, curve=curve.out_expo),
-            player.arm_right.animate_position((0.25, -0.4, 0.7), duration=0.12, curve=curve.out_expo)
+            player.arm_left.animate_position((-.75,-.6,-1), duration=0.12, curve=curve.out_expo),
+            player.arm_right.animate_position((.75,-.6,1), duration=0.12, curve=curve.out_expo)
         ],
         delay=0.18
+    )
+
+def play_spike_animation(player):
+    # forward bump push
+    player.arm_right.animate_position((0.55, 1, 0.4), duration=0.2, curve=curve.linear)
+    # slight dip
+    invoke(
+        lambda: [
+            player.arm_right.animate_position((0.25, -0.55, 0.6), duration=0.1, curve=curve.linear),
+            player.arm_right.animate_rotation((0,-90,-45), duration=0.2, curve=curve.linear)
+        ],
+        delay=0.3
+    )
+
+    # return to idle
+    invoke(
+        lambda: [
+            player.arm_right.animate_position((.75,-.6,1), duration=0.12, curve=curve.out_expo),
+            player.arm_right.animate_rotation((0,45,-45), duration=0.08, curve=curve.out_expo)
+        ],
+        delay=0.6
     )
 
 
@@ -201,20 +222,24 @@ class Player(Entity):
         # in Player.__init__ after camera setup
         # First-person arms
         self.arm_left = Entity(
-            parent=camera,
             model='cube',
-            color=color.azure,
-            position=Vec3(-0.3, -0.3, 1.5),
-            scale=Vec3(0.3, 0.3, 1.5),
-            render_queue=100
+            texture='white_cube',
+            color=color.rgb(255,229,180),
+            position=Vec3(-.75,-.6,-1),
+            rotation=Vec3(0,-45,45),
+            parent=camera.ui,
+            scale=(.3,.5,.3),
+            visible=True
         )
         self.arm_right = Entity(
-            parent=camera,
             model='cube',
-            color=color.azure,
-            position=Vec3(0.3, -0.3, 1.5),
-            scale=Vec3(0.3, 0.3, 1.5),
-            render_queue=100
+            texture='white_cube',
+            color=color.rgb(255,229,180),
+            position=Vec3(.75,-.6,1),
+            rotation=Vec3(45,-45,0),
+            parent=camera.ui,
+            scale=(.3,.5,.3),
+            visible=True
         )
 
 
@@ -277,6 +302,7 @@ class Player(Entity):
             ball.velocity = forward_dir * 15
             spike_effect(self.position)
             camera_shake()
+            play_spike_animation(self)
 
 player = Player()
 
