@@ -13,7 +13,10 @@ opp_spike = False
 last_hitter = None  # "player" or "ai"
 
 score_text = Text("0    -    0", origin=(0,0), y=.45, scale=2)
-
+sound = Audio('bump.mp3', loop=False, autoplay=False)
+spike = Audio('spike.mp3', loop=False, autoplay=False)
+crowd = Audio('crowd.mp3', loop=True, auto_play=True)
+clap = Audio('clap.mp3', loop=False, autoplay=False)
 # --------------------------------------------------
 # VISUAL EFFECTS
 # --------------------------------------------------
@@ -28,6 +31,7 @@ def bump_effect(position, color=color.white):
         emissive=True
     )
     e.animate_scale(1, duration=0.15)
+    sound.play()
     destroy(e, delay=0.25)
 
 def spike_effect(position):
@@ -47,12 +51,13 @@ def spike_effect(position):
     # Bright flash on ball
     flash = Entity(
         model='sphere',
-        position=position,
+        position=position,  
         scale=0.5,
         color=color.rgb(255,80,80),
         emissive=True
     )
     flash.animate_color(color.clear, duration=0.15)
+    spike.play()
     destroy(flash, delay=0.2)
 
 
@@ -364,6 +369,7 @@ class Opponent(Entity):
                 else:
                     bump_dir = Vec3(-1, 1, random.uniform(-0.3, 0.3)).normalized()
                     ball.velocity = bump_dir * 9
+                    bump_effect(self.position)
 
 opponent = Opponent()
 
@@ -431,6 +437,7 @@ def award_point(to):
         ai_score += 1
         server = "ai"
 
+    clap.play()
     score_text.text = f"{player_score}    -    {ai_score}"
     reset_for_serve()
 
